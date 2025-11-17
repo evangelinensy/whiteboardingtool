@@ -67,15 +67,32 @@ const TldrawWhiteboard = forwardRef<WhiteboardRef, TldrawWhiteboardProps>(
       reset: () => {
         if (editorRef.current) {
           const editor = editorRef.current;
-          const shapeIds = editor.getCurrentPageShapeIds();
 
+          // Clear all shapes
+          const shapeIds = editor.getCurrentPageShapeIds();
           if (shapeIds.size > 0) {
             editor.deleteShapes([...shapeIds]);
+          }
+
+          // Clear all assets (images, etc.)
+          const assets = editor.getAssets();
+          if (assets.length > 0) {
+            editor.deleteAssets(assets.map((asset) => asset.id));
           }
 
           // Reset zoom to default
           editor.resetZoom();
           editor.zoomToFit({ animation: { duration: 0 } });
+
+          // Clear persisted storage (IndexedDB)
+          try {
+            const persistenceKey = "design-challenge-whiteboard";
+            // Clear the store snapshot from localStorage
+            localStorage.removeItem(`tldraw_store_${persistenceKey}`);
+            // Note: IndexedDB assets are cleared by deleteAsset above
+          } catch (error) {
+            console.error("Error clearing tldraw storage:", error);
+          }
         }
       },
     }));
@@ -160,7 +177,10 @@ const TldrawWhiteboard = forwardRef<WhiteboardRef, TldrawWhiteboardProps>(
 
     return (
       <div style={{ position: "relative", width: "100%", height: "100%" }}>
-        <Tldraw onMount={handleMount} />
+        <Tldraw
+          onMount={handleMount}
+          persistenceKey="design-challenge-whiteboard"
+        />
       </div>
     );
   }
