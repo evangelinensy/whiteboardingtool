@@ -1,0 +1,135 @@
+{
+  "rubric_version": "1.0",
+  "rubric_name": "Product Design Interview Evaluation",
+  "categories": [
+    {
+      "id": "problem_framing",
+      "name": "Problem Framing",
+      "weight": 1.5,
+      "description": "How well the candidate defines and scopes the problem",
+      "levels": {
+        "1": "No clear problem definition; jumps straight to solutions",
+        "2": "Vague problem statement; misses key constraints or context",
+        "3": "Basic problem definition with some constraints identified",
+        "4": "Clear problem statement with constraints, users, and scope defined",
+        "5": "Exceptional framing with comprehensive problem analysis, stakeholder mapping, and success criteria"
+      },
+      "signal_keywords": ["goal", "objective", "scope", "constraint", "problem", "define", "clarify"],
+      "negative_signals": ["I'll just build", "let me start designing", "the solution is"]
+    },
+    {
+      "id": "idea_breadth",
+      "name": "Ideation Breadth",
+      "weight": 1.0,
+      "description": "Ability to generate multiple diverse solutions before converging",
+      "levels": {
+        "1": "Single solution proposed without exploring alternatives",
+        "2": "Two solutions considered but superficially",
+        "3": "Three or more solutions with basic trade-off analysis",
+        "4": "Diverse solution space explored with clear selection criteria",
+        "5": "Creative ideation with unique approaches, systematic evaluation, and principled convergence"
+      },
+      "signal_keywords": ["alternative", "another approach", "we could also", "trade-off", "pros and cons"],
+      "negative_signals": ["this is the only way", "obviously we should"]
+    },
+    {
+      "id": "systems_thinking",
+      "name": "Systems Thinking",
+      "weight": 1.2,
+      "description": "Understanding of user flows, edge cases, and error states",
+      "levels": {
+        "1": "Only considers happy path; no edge cases",
+        "2": "Acknowledges edge cases exist but doesn't address them",
+        "3": "Identifies some edge cases and basic error states",
+        "4": "Comprehensive flow mapping with error handling and recovery",
+        "5": "Deep systems analysis including state management, failure modes, and scalability"
+      },
+      "signal_keywords": ["what if", "edge case", "error", "failure", "state", "flow", "recovery"],
+      "negative_signals": ["assume everything works", "users won't do that"]
+    },
+    {
+      "id": "visual_design",
+      "name": "Low-Fidelity Wireframing",
+      "weight": 1.0,
+      "description": "Quality and clarity of visual representations",
+      "levels": {
+        "1": "No visual artifacts or illegible sketches",
+        "2": "Basic shapes with no hierarchy or labels",
+        "3": "Recognizable UI elements with some labeling",
+        "4": "Clear wireframes with information hierarchy and component annotations",
+        "5": "Professional-quality wireframes with interaction annotations, responsive considerations, and clear flow"
+      },
+      "visual_signals": ["labeled boxes", "arrows showing flow", "component names", "state indicators"]
+    },
+    {
+      "id": "component_vocabulary",
+      "name": "UI/UX Pattern Knowledge",
+      "weight": 0.8,
+      "description": "Familiarity with standard design patterns and components",
+      "levels": {
+        "1": "Uses vague terms like 'box' or 'thing'",
+        "2": "Knows basic components (button, input) but limited vocabulary",
+        "3": "Uses proper component names (modal, dropdown, toast, accordion)",
+        "4": "References advanced patterns (lazy loading, infinite scroll, skeleton screens)",
+        "5": "Expert vocabulary including interaction patterns, accessibility considerations, and platform-specific conventions"
+      },
+      "signal_keywords": ["modal", "toast", "accordion", "carousel", "breadcrumb", "skeleton", "progressive disclosure", "infinite scroll", "lazy load"],
+      "negative_signals": ["that popup thing", "the box that appears"]
+    },
+    {
+      "id": "prioritization",
+      "name": "Prioritization & Scoping",
+      "weight": 1.0,
+      "description": "Making trade-offs and MVP decisions",
+      "levels": {
+        "1": "No prioritization; tries to solve everything",
+        "2": "Mentions priority but no clear framework",
+        "3": "Basic MVP definition with some rationale",
+        "4": "Clear prioritization with impact/effort analysis",
+        "5": "Strategic scoping with phased rollout plan and success metrics"
+      },
+      "signal_keywords": ["MVP", "priority", "must-have", "nice-to-have", "phase", "impact", "effort"],
+      "negative_signals": ["we need all of this", "can't ship without"]
+    },
+    {
+      "id": "metrics_discipline",
+      "name": "Metrics & Success Definition",
+      "weight": 0.8,
+      "description": "Ability to define and measure success",
+      "levels": {
+        "1": "No mention of metrics or success criteria",
+        "2": "Vague success statements like 'users will like it'",
+        "3": "Basic metrics mentioned (DAU, conversion rate)",
+        "4": "Specific KPIs with measurement approach",
+        "5": "Comprehensive metrics framework with leading/lagging indicators and experimentation plan"
+      },
+      "signal_keywords": ["KPI", "metric", "measure", "success", "experiment", "A/B test", "conversion", "retention"],
+      "negative_signals": ["we'll know if it works", "users will tell us"]
+    },
+    {
+      "id": "communication_clarity",
+      "name": "Communication Clarity",
+      "weight": 1.0,
+      "description": "How clearly the candidate articulates their thinking",
+      "levels": {
+        "1": "Incoherent or jumbled thoughts; hard to follow",
+        "2": "Some structure but frequent tangents",
+        "3": "Generally clear with occasional confusion",
+        "4": "Well-structured thinking with clear transitions",
+        "5": "Exceptional clarity with storytelling, analogies, and logical flow"
+      },
+      "signal_keywords": ["first", "next", "therefore", "because", "as a result", "to summarize"],
+      "negative_signals": ["um", "I don't know", "let me backtrack", "wait actually"]
+    }
+  ],
+  "scoring": {
+    "method": "weighted_average",
+    "passing_threshold": 3.0,
+    "exceptional_threshold": 4.5
+  },
+  "feedback_instructions": {
+    "strengths": "Identify 2-3 specific moments where the candidate demonstrated strong skills",
+    "improvements": "Identify 2-3 specific areas with actionable advice for improvement",
+    "drills": "Suggest practice exercises tailored to the lowest-scoring categories"
+  }
+}
