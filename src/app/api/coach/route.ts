@@ -81,21 +81,36 @@ Coverage so far: ${body.coverage.join(", ") || "none"}${canvasContext}`;
     if (body.canvasImageBase64) {
       // Remove data URL prefix if present
       const base64Data = body.canvasImageBase64.replace(/^data:image\/\w+;base64,/, "");
-      contents = [
-        { text: "Here is the current state of the candidate's whiteboard:" },
-        { inlineData: { mimeType: "image/png", data: base64Data } },
-        { text: `\n\nConversation history:\n${conversationHistory || "User just started the session."}` }
-      ];
+
+      // Check image size - skip if too large (> 4MB base64 ≈ 3MB original)
+      const imageSizeMB = (base64Data.length * 0.75) / (1024 * 1024);
+      if (imageSizeMB > 4) {
+        console.warn(`Canvas image too large (${imageSizeMB.toFixed(2)}MB), skipping image analysis`);
+      } else {
+        contents = [
+          { text: "Here is the current state of the candidate's whiteboard:" },
+          { inlineData: { mimeType: "image/png", data: base64Data } },
+          { text: `\n\nConversation history:\n${conversationHistory || "User just started the session."}` }
+        ];
+      }
     }
 
-    const result = await genAI.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents,
-      config: {
-        temperature: 0.7,
-        systemInstruction,
-      },
+    // Add timeout wrapper for Gemini API call (60 seconds)
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error("Gemini API timeout after 60s")), 60000);
     });
+
+    const result = await Promise.race([
+      genAI.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents,
+        config: {
+          temperature: 0.7,
+          systemInstruction,
+        },
+      }),
+      timeoutPromise
+    ]);
 
     const nudge = result.text || "Keep going! What are you thinking about?";
 
@@ -117,11 +132,28 @@ Coverage so far: ${body.coverage.join(", ") || "none"}${canvasContext}`;
     }
 
     return NextResponse.json({ nudge, coverageNudge });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Coach API error:", error);
-    return NextResponse.json(
-      { error: "Failed to get coaching response" },
-      { status: 500 }
-    );
+
+    // Provide helpful fallback based on error type
+    let fallbackNudge = "Keep going! What are you thinking about next?";
+
+    if (error?.message?.includes("timeout")) {
+      fallbackNudge = "Tell me more about your thinking process.";
+      console.warn("Gemini API timeout - using fallback response");
+    } else if (error?.message?.includes("quota") || error?.message?.includes("RESOURCE_EXHAUSTED")) {
+      fallbackNudge = "What aspect of the design would you like to explore next?";
+      console.warn("Gemini API quota exceeded - using fallback response");
+    } else if (error?.status === 500 || error?.error?.status === "INTERNAL") {
+      fallbackNudge = "Can you walk me through your current approach?";
+      console.warn("Gemini API internal error - using fallback response");
+    }
+
+    // Return fallback instead of failing completely
+    return NextResponse.json({
+      nudge: fallbackNudge,
+      coverageNudge: undefined,
+      fallback: true
+    });
   }
 }
