@@ -33,52 +33,31 @@ const TldrawWhiteboard = forwardRef<WhiteboardRef, TldrawWhiteboardProps>(
 
         try {
           const editor = editorRef.current;
-          const shapes = editor.getCurrentPageShapes();
+          const shapeIds = editor.getCurrentPageShapeIds();
 
-          if (shapes.length === 0) {
+          if (shapeIds.size === 0) {
             return "";
           }
 
-          // Get all shape IDs
-          const shapeIds = shapes.map((s) => s.id);
-
-          // Export to SVG first
-          const svg = await editor.getSvgString(shapeIds, {
-            scale: 1,
+          // Export to PNG using tldraw v4 API
+          const result = await editor.toImage([...shapeIds], {
+            format: 'png',
             background: true,
+            scale: 1,
           });
 
-          if (!svg) {
+          if (!result || !result.blob) {
             return "";
           }
 
-          // Convert SVG to PNG using canvas
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          if (!ctx) {
-            return "";
-          }
-
-          // Create image from SVG
-          const img = new Image();
-          const svgBlob = new Blob([svg.svg], { type: "image/svg+xml" });
-          const url = URL.createObjectURL(svgBlob);
-
-          return new Promise<string>((resolve) => {
-            img.onload = () => {
-              canvas.width = img.width || 1200;
-              canvas.height = img.height || 800;
-              ctx.fillStyle = "#ffffff";
-              ctx.fillRect(0, 0, canvas.width, canvas.height);
-              ctx.drawImage(img, 0, 0);
-              URL.revokeObjectURL(url);
-              resolve(canvas.toDataURL("image/png"));
+          // Convert blob to base64 data URL
+          return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              resolve(reader.result as string);
             };
-            img.onerror = () => {
-              URL.revokeObjectURL(url);
-              resolve("");
-            };
-            img.src = url;
+            reader.onerror = reject;
+            reader.readAsDataURL(result.blob);
           });
         } catch (error) {
           console.error("Error exporting canvas:", error);
@@ -87,9 +66,16 @@ const TldrawWhiteboard = forwardRef<WhiteboardRef, TldrawWhiteboardProps>(
       },
       reset: () => {
         if (editorRef.current) {
-          editorRef.current.selectAll();
-          editorRef.current.deleteShapes(editorRef.current.getSelectedShapeIds());
-          editorRef.current.zoomToFit();
+          const editor = editorRef.current;
+          const shapeIds = editor.getCurrentPageShapeIds();
+
+          if (shapeIds.size > 0) {
+            editor.deleteShapes([...shapeIds]);
+          }
+
+          // Reset zoom to default
+          editor.resetZoom();
+          editor.zoomToFit({ animation: { duration: 0 } });
         }
       },
     }));
@@ -123,6 +109,7 @@ const TldrawWhiteboard = forwardRef<WhiteboardRef, TldrawWhiteboardProps>(
             break;
           case "arrow":
           case "line":
+          case "draw":
             arrowsCount++;
             break;
         }
@@ -143,21 +130,30 @@ const TldrawWhiteboard = forwardRef<WhiteboardRef, TldrawWhiteboardProps>(
         editorRef.current = editor;
         setIsReady(true);
 
+        console.log("[TldrawWhiteboard] Editor mounted successfully");
+
         // Initial summary
-        updateSummary();
+        setTimeout(() => updateSummary(), 100);
 
         // Register side effects to monitor shape changes
-        editor.sideEffects.registerAfterCreateHandler("shape", () => {
+        const cleanupCreate = editor.sideEffects.registerAfterCreateHandler("shape", () => {
           updateSummary();
         });
 
-        editor.sideEffects.registerAfterChangeHandler("shape", () => {
+        const cleanupChange = editor.sideEffects.registerAfterChangeHandler("shape", () => {
           updateSummary();
         });
 
-        editor.sideEffects.registerAfterDeleteHandler("shape", () => {
+        const cleanupDelete = editor.sideEffects.registerAfterDeleteHandler("shape", () => {
           updateSummary();
         });
+
+        // Cleanup function (though not used in forwardRef, good practice)
+        return () => {
+          cleanupCreate();
+          cleanupChange();
+          cleanupDelete();
+        };
       },
       [updateSummary]
     );
