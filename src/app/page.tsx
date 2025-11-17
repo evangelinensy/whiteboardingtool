@@ -107,6 +107,7 @@ export default function Home() {
   const whiteboardRef = useRef<WhiteboardRef>(null);
   const sessionReadyRef = useRef(sessionReady);
   const isLoadingRef = useRef(isLoading);
+  const accumulatedTranscriptRef = useRef<string>("");
 
   // Initialize speech recognition
   useEffect(() => {
@@ -137,8 +138,10 @@ export default function Home() {
         // Process final transcript
         if (final) {
           console.log("STT final result:", final);
+          // Accumulate final results instead of immediately sending to coach
+          accumulatedTranscriptRef.current += final + " ";
           setInterimTranscript(""); // Clear interim when we get final
-          addUserMessageRef.current(final);
+          // Don't call addUserMessage here - wait for user to click "Stop"
         }
       };
 
@@ -620,9 +623,20 @@ export default function Home() {
     }
 
     if (isListening) {
+      // Stop listening
       recognitionRef.current.stop();
       setIsListening(false);
+
+      // Send accumulated transcript to coach
+      const fullTranscript = accumulatedTranscriptRef.current.trim();
+      if (fullTranscript) {
+        console.log("Sending accumulated transcript:", fullTranscript);
+        addUserMessage(fullTranscript);
+        accumulatedTranscriptRef.current = ""; // Clear for next session
+      }
     } else {
+      // Start listening
+      accumulatedTranscriptRef.current = ""; // Clear any old transcript
       recognitionRef.current.start();
       setIsListening(true);
     }
