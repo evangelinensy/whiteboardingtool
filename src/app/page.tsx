@@ -143,19 +143,26 @@ export default function Home() {
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        // "no-speech" is expected when user pauses - don't treat as error
+        if (event.error === "no-speech") {
+          // Silently ignore - this is normal behavior
+          return;
+        }
+
+        // Log actual errors (but not no-speech)
         console.error("Speech recognition error:", event.error);
         setIsListening(false);
         setInterimTranscript("");
 
-        // Show user-friendly error messages
+        // Show user-friendly error messages for real issues
         if (event.error === "not-allowed") {
           alert("Microphone access denied. Please:\n1. Click the lock/camera icon in your browser's address bar\n2. Allow microphone access\n3. Refresh the page and try again\n\nNote: You can still type your responses in the text box below.");
-        } else if (event.error === "no-speech") {
-          // Silently ignore - user just didn't speak
         } else if (event.error === "audio-capture") {
           alert("No microphone found. Please check your microphone is connected and not in use by another app.");
         } else if (event.error === "network") {
           alert("Network error during speech recognition. Please check your internet connection.");
+        } else if (event.error === "aborted") {
+          // Silently ignore - recognition was intentionally stopped
         }
       };
 
