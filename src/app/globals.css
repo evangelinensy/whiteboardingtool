@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import url('tldraw/tldraw.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap');
 
 :root {
   --background: #ffffff;
@@ -68,6 +70,13 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Shadcn color tokens for stepper */
+  --color-primary: #1a73e8;
+  --color-primary-foreground: #ffffff;
+  --color-muted: #e8eaed;
+  --color-muted-foreground: #5f6368;
+  --color-border: #dadce0;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Whiteboard, { WhiteboardRef } from "./components/Whiteboard";
+import TldrawWhiteboard, { WhiteboardRef } from "./components/TldrawWhiteboard";
+import {
+  Stepper,
+  StepperIndicator,
+  StepperItem,
+  StepperTitle,
+  StepperTrigger,
+} from "@/components/ui/stepper";
 
 interface Message {
   role: "coach" | "user";
@@ -946,21 +953,22 @@ export default function Home() {
               Timer paused
             </div>
           )}
-          <div className="flex gap-1">
+          <Stepper value={phaseIndex} onValueChange={setPhase} className="items-start gap-2">
             {PHASES.map((phase, idx) => (
-              <button
-                key={phase.name}
-                onClick={() => setPhase(idx)}
-                className={`flex-1 text-xs py-1 px-2 rounded ${
-                  idx === phaseIndex
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 hover:bg-gray-300"
-                }`}
-              >
-                {phase.name}
-              </button>
+              <StepperItem key={phase.name} step={idx} className="flex-1">
+                <StepperTrigger className="w-full flex-col items-start gap-2">
+                  <StepperIndicator asChild className="h-1.5 w-full bg-gray-200 rounded-full data-[state=active]:bg-blue-500 data-[state=completed]:bg-blue-500">
+                    <span className="sr-only">{idx + 1}</span>
+                  </StepperIndicator>
+                  <div className="w-full">
+                    <StepperTitle className="text-xs text-gray-700 data-[state=active]:text-blue-600 data-[state=active]:font-semibold">
+                      {phase.name}
+                    </StepperTitle>
+                  </div>
+                </StepperTrigger>
+              </StepperItem>
             ))}
-          </div>
+          </Stepper>
         </div>
 
         {/* Mic Controls */}
@@ -1097,7 +1105,7 @@ export default function Home() {
           </div>
         </div>
         <div className="flex-1 overflow-hidden">
-          <Whiteboard
+          <TldrawWhiteboard
             ref={whiteboardRef}
             onSummaryChange={handleCanvasSummaryChange}
             onExport={handleCanvasExport}
