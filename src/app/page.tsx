@@ -88,6 +88,7 @@ export default function Home() {
   const [rightPanelWidth, setRightPanelWidth] = useState(400);
   const [isDraggingLeft, setIsDraggingLeft] = useState(false);
   const [isDraggingRight, setIsDraggingRight] = useState(false);
+  const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
   const [evalResults, setEvalResults] = useState<{
     rubric?: Record<string, number>;
     strengths?: string[];
@@ -937,17 +938,81 @@ export default function Home() {
       {/* Left Sidebar */}
       <div
         className="bg-white border-r flex flex-col flex-shrink-0"
-        style={{ width: `${leftPanelWidth}px` }}
+        style={{ width: isLeftPanelCollapsed ? '64px' : `${leftPanelWidth}px` }}
       >
-        <div className="p-4 border-b flex items-center justify-between">
-          <h1 className="text-lg font-bold text-gray-800">Design Challenge</h1>
-          <button
-            onClick={startNewSession}
-            className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded font-medium transition-colors"
-          >
-            New Session
-          </button>
-        </div>
+        {isLeftPanelCollapsed ? (
+          /* Collapsed View - Minimal vertical bar */
+          <>
+            <div className="p-2 border-b flex flex-col items-center gap-2">
+              <button
+                onClick={() => setIsLeftPanelCollapsed(false)}
+                className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                title="Expand panel"
+              >
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+            {/* Minimal Timer */}
+            <div className="p-2 border-b flex flex-col items-center gap-2">
+              <div className="text-xl font-mono font-bold text-gray-800 text-center leading-tight">
+                {timeLeft >= 60 ? Math.floor(timeLeft / 60) : timeLeft}
+              </div>
+              <div className="text-xs text-gray-500">
+                {timeLeft >= 60 ? 'min' : 'sec'}
+              </div>
+              <button
+                onClick={() => setIsTimerPaused(!isTimerPaused)}
+                className={`text-xs px-1 py-0.5 rounded ${
+                  isTimerPaused ? "bg-green-500 text-white" : "bg-yellow-500 text-white"
+                }`}
+                title={isTimerPaused ? "Resume" : "Pause"}
+              >
+                {isTimerPaused ? "▶" : "⏸"}
+              </button>
+            </div>
+            {/* Minimal Start/Stop Button */}
+            <div className="p-2 flex flex-col items-center gap-2">
+              <button
+                onClick={toggleListening}
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                  isListening ? "bg-red-500" : "bg-green-500 hover:bg-green-600"
+                }`}
+                title={isListening ? "Stop Talking" : "Start Talking"}
+              >
+                {isListening ? "■" : "▶"}
+              </button>
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  isListening ? "bg-green-500 animate-pulse" : "bg-gray-300"
+                }`}
+              />
+            </div>
+          </>
+        ) : (
+          /* Expanded View - Full panel */
+          <>
+            <div className="p-4 border-b flex items-center justify-between">
+              <h1 className="text-lg font-bold text-gray-800">Design Challenge</h1>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsLeftPanelCollapsed(true)}
+                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  title="Collapse panel"
+                >
+                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={startNewSession}
+                  className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded font-medium transition-colors"
+                >
+                  New Session
+                </button>
+              </div>
+            </div>
 
         {/* Phase and Timer */}
         <div className="p-4 border-b">
@@ -1011,51 +1076,6 @@ export default function Home() {
               }`}
             />
           </div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm text-gray-700 font-medium">
-              Coach: {ttsQuotaExceeded ? "Audio unavailable (quota)" : isLoadingAudio ? "Loading audio..." : isSpeaking ? (isAudioPaused ? "Paused" : "Speaking...") : "Silent"}
-            </span>
-            <button
-              onClick={toggleMute}
-              className={`text-xs py-1 px-2 rounded font-medium ${
-                isMuted ? "bg-red-100 text-red-700" : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-              }`}
-            >
-              {isMuted ? "Unmute" : "Mute"}
-            </button>
-          </div>
-          {ttsQuotaExceeded && (
-            <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded mb-2">
-              TTS quota exceeded (15 req/day on free tier). Text still works.
-            </div>
-          )}
-          {/* Audio playback controls */}
-          <div className="flex items-center gap-1">
-            {isSpeaking && !isAudioPaused && (
-              <button
-                onClick={pauseAudio}
-                className="flex-1 py-1.5 px-3 bg-yellow-100 text-yellow-800 rounded text-xs font-medium hover:bg-yellow-200 transition-colors"
-              >
-                ⏸ Pause
-              </button>
-            )}
-            {isAudioPaused && (
-              <button
-                onClick={resumeAudio}
-                className="flex-1 py-1.5 px-3 bg-green-100 text-green-800 rounded text-xs font-medium hover:bg-green-200 transition-colors"
-              >
-                ▶ Resume
-              </button>
-            )}
-            {lastAudioUrl && (
-              <button
-                onClick={replayAudio}
-                className="flex-1 py-1.5 px-3 bg-blue-100 text-blue-800 rounded text-xs font-medium hover:bg-blue-200 transition-colors"
-              >
-                🔄 Replay
-              </button>
-            )}
-          </div>
         </div>
 
         {/* Prompt */}
@@ -1098,14 +1118,18 @@ export default function Home() {
             End & Debrief
           </button>
         </div>
+          </>
+        )}
       </div>
 
       {/* Left Resize Handle */}
-      <div
-        className="w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors flex-shrink-0"
-        onMouseDown={() => setIsDraggingLeft(true)}
-        title="Drag to resize"
-      />
+      {!isLeftPanelCollapsed && (
+        <div
+          className="w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors flex-shrink-0"
+          onMouseDown={() => setIsDraggingLeft(true)}
+          title="Drag to resize"
+        />
+      )}
 
       {/* Center Panel - Whiteboard (takes most space) */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -1147,7 +1171,59 @@ export default function Home() {
         style={{ width: `${rightPanelWidth}px` }}
       >
         <div className="px-4 py-3 border-b">
-          <h2 className="text-sm font-semibold text-gray-700">Transcript</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-semibold text-gray-700">Transcript</h2>
+          </div>
+          {/* Coach Audio Controls */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-600">
+                Coach: {ttsQuotaExceeded ? "Audio unavailable" : isLoadingAudio ? "Loading..." : isSpeaking ? (isAudioPaused ? "Paused" : "Speaking") : "Silent"}
+              </span>
+              <button
+                onClick={toggleMute}
+                className={`text-xs py-0.5 px-2 rounded font-medium ${
+                  isMuted ? "bg-red-100 text-red-700" : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                }`}
+              >
+                {isMuted ? "🔇 Unmute" : "🔊 Mute"}
+              </button>
+            </div>
+            {ttsQuotaExceeded && (
+              <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                TTS quota exceeded. Text still works.
+              </div>
+            )}
+            {/* Audio playback controls */}
+            {(isSpeaking || lastAudioUrl) && (
+              <div className="flex items-center gap-1">
+                {isSpeaking && !isAudioPaused && (
+                  <button
+                    onClick={pauseAudio}
+                    className="flex-1 py-1 px-2 bg-yellow-100 text-yellow-800 rounded text-xs font-medium hover:bg-yellow-200"
+                  >
+                    ⏸ Pause
+                  </button>
+                )}
+                {isAudioPaused && (
+                  <button
+                    onClick={resumeAudio}
+                    className="flex-1 py-1 px-2 bg-green-100 text-green-800 rounded text-xs font-medium hover:bg-green-200"
+                  >
+                    ▶ Resume
+                  </button>
+                )}
+                {lastAudioUrl && (
+                  <button
+                    onClick={replayAudio}
+                    className="flex-1 py-1 px-2 bg-blue-100 text-blue-800 rounded text-xs font-medium hover:bg-blue-200"
+                  >
+                    🔄 Replay
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
           {messages.map((msg, idx) => {
