@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# custom prompts (keep template and examples)
+/prompts/*
+!/prompts/README.md
+!/prompts/template.md
+!/prompts/airbnb-host-training.md
