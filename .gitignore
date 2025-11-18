@@ -45,3 +45,5 @@ next-env.d.ts
 !/prompts/README.md
 !/prompts/template.md
 !/prompts/airbnb-host-training.md
+!/prompts/open-ended-examples.md
+!/prompts/instructions.md

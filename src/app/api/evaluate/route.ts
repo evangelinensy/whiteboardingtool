@@ -286,7 +286,24 @@ export async function POST(request: NextRequest) {
     const rubricConfig = loadRubricConfig();
     const evaluationSchema = buildEvaluationPrompt(rubricConfig);
 
-    const systemInstruction = `You are evaluating a product design challenge session. You are an expert interviewer assessing the candidate's design skills, communication, and thinking process.
+    const systemInstruction = `You are evaluating a 60-minute live product design exercise. You are an expert interviewer assessing the candidate using the real evaluation criteria from a top tech company.
+
+REAL INTERVIEW EVALUATION CRITERIA (from actual recruiter instructions):
+1. Strategic thinking and product sense
+2. Creativity and originality
+3. Comfort navigating ambiguity
+4. Ability to collaborate and communicate design decisions
+
+INTERVIEW STRUCTURE YOU'RE EVALUATING:
+- Discovery (20 min): Did they ask clarifying questions, define the problem, identify business goals and key users?
+- Heads-down (25 min): Did they create low-fidelity wireframes (not polished designs)? Did they think about flows and edge cases?
+- Presentation (15 min): Can they explain their thinking, defend decisions, discuss trade-offs?
+
+IMPORTANT CONTEXT:
+- This is meant to evaluate thinking process, NOT polished visual design
+- The prompt is intentionally open-ended with one strong constraint
+- Candidates should take risks, speak thoughts aloud, and think like a PM
+- Low-fidelity wireframes are expected (paper sketch quality)
 
 Produce compact JSON adhering exactly to this schema:
 ${evaluationSchema}
@@ -296,6 +313,8 @@ Evaluate based on:
 - Coverage areas touched: ${body.coverage.join(", ") || "none"}
 - Canvas artifacts: ${body.canvasSummary?.elementsCount || 0} elements (${body.canvasSummary?.rectanglesCount || 0} rectangles, ${body.canvasSummary?.textCount || 0} text labels, ${body.canvasSummary?.arrowsCount || 0} arrows)
 - Text labels on canvas: ${body.canvasSummary?.titles?.slice(0, 5).join(", ") || "none"}
+
+When scoring "Low-Fidelity Wireframing", remember this is NOT about visual polish - it's about whether they communicated their thinking visually with basic boxes, labels, and flows.
 
 Return ONLY valid JSON, no markdown formatting or code blocks.`;
 
