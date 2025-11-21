@@ -295,7 +295,7 @@ export default function Home() {
   };
 
   const addUserMessage = useCallback(
-    (text: string) => {
+    (text: string, shouldTriggerCoach = false) => {
       const newMessage: Message = { role: "user", content: text };
       setMessages((prev) => [...prev, newMessage]);
 
@@ -309,10 +309,13 @@ export default function Home() {
       });
       setCoverage(newCoverage);
 
-      // Auto-respond from coach after user speaks (simulate real interview)
-      setTimeout(() => {
-        autoCoachResponse(text, newCoverage);
-      }, 1500);
+      // Only trigger coach if explicitly requested OR if message contains a question
+      const hasQuestion = text.trim().endsWith('?');
+      if (shouldTriggerCoach || hasQuestion) {
+        setTimeout(() => {
+          autoCoachResponse(text, newCoverage);
+        }, 1500);
+      }
     },
     [coverage]
   );
@@ -1313,23 +1316,38 @@ export default function Home() {
 
         {/* Manual Input */}
         <div className="p-3 bg-white border-t">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              onKeyDown={(e) => {
-                e.stopPropagation(); // Prevent whiteboard shortcuts from firing
-                if (e.key === "Enter") handleManualInput();
-              }}
-              placeholder="Type your thinking..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyDown={(e) => {
+                  e.stopPropagation(); // Prevent whiteboard shortcuts from firing
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleManualInput();
+                  }
+                }}
+                placeholder="Type your thinking... (End with ? to ask coach)"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <button
+                onClick={handleManualInput}
+                className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm font-medium whitespace-nowrap"
+              >
+                Send
+              </button>
+            </div>
             <button
-              onClick={handleManualInput}
-              className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm font-medium"
+              onClick={askCoach}
+              disabled={isLoading}
+              className="w-full py-2 px-4 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Send
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {isLoading ? "Coach is thinking..." : "Ask Coach"}
             </button>
           </div>
         </div>
