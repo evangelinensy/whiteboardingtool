@@ -58,6 +58,7 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const [coverage, setCoverage] = useState<Set<string>>(new Set());
+  const [sessionId, setSessionId] = useState(() => Date.now().toString());
   const [canvasSummary, setCanvasSummary] = useState<CanvasSummary>({
     elementsCount: 0,
     rectanglesCount: 0,
@@ -763,6 +764,8 @@ export default function Home() {
     setTtsQuotaExceeded(false);
     setIsTimerPaused(false);
     hasStartedInterviewRef.current = false;
+    // Generate new session ID to clear tldraw cache
+    setSessionId(Date.now().toString());
   };
 
   // Landing page
@@ -1158,6 +1161,7 @@ export default function Home() {
             ref={whiteboardRef}
             onSummaryChange={handleCanvasSummaryChange}
             onExport={handleCanvasExport}
+            sessionId={sessionId}
           />
         </div>
       </div>

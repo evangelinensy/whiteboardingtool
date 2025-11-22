@@ -17,10 +17,11 @@ interface TldrawWhiteboardProps {
     titles: string[];
   }) => void;
   onExport: (base64: string) => void;
+  sessionId: string;
 }
 
 const TldrawWhiteboard = forwardRef<WhiteboardRef, TldrawWhiteboardProps>(
-  function TldrawWhiteboard({ onSummaryChange, onExport }, ref) {
+  function TldrawWhiteboard({ onSummaryChange, onExport, sessionId }, ref) {
     const editorRef = useRef<Editor | null>(null);
     const [isReady, setIsReady] = useState(false);
 
@@ -86,9 +87,8 @@ const TldrawWhiteboard = forwardRef<WhiteboardRef, TldrawWhiteboardProps>(
 
           // Clear persisted storage (IndexedDB)
           try {
-            const persistenceKey = "design-challenge-whiteboard";
             // Clear the store snapshot from localStorage
-            localStorage.removeItem(`tldraw_store_${persistenceKey}`);
+            localStorage.removeItem(`tldraw_store_session-${sessionId}`);
             // Note: IndexedDB assets are cleared by deleteAsset above
           } catch (error) {
             console.error("Error clearing tldraw storage:", error);
@@ -179,7 +179,7 @@ const TldrawWhiteboard = forwardRef<WhiteboardRef, TldrawWhiteboardProps>(
       <div style={{ position: "relative", width: "100%", height: "100%" }}>
         <Tldraw
           onMount={handleMount}
-          persistenceKey="design-challenge-whiteboard"
+          persistenceKey={`session-${sessionId}`}
         />
       </div>
     );
