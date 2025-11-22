@@ -310,9 +310,30 @@ export default function Home() {
       });
       setCoverage(newCoverage);
 
-      // Only trigger coach if explicitly requested OR if message contains a question
-      const hasQuestion = text.trim().endsWith('?');
-      if (shouldTriggerCoach || hasQuestion) {
+      // Detect if message is a question (more robust detection)
+      const isQuestion = () => {
+        const trimmed = text.trim();
+
+        // Ends with question mark
+        if (trimmed.endsWith('?')) return true;
+
+        // Starts with question words
+        const questionStarters = ['why', 'what', 'who', 'where', 'when', 'how', 'which', 'whose', 'whom'];
+        if (questionStarters.some(q => lowerText.startsWith(q + ' '))) return true;
+
+        // Contains question phrases
+        const questionPhrases = [
+          'do i', 'do we', 'should i', 'should we', 'could i', 'could we',
+          'would i', 'would we', 'can i', 'can we', 'is this', 'is it',
+          'are we', 'are there', 'does this', 'will this'
+        ];
+        if (questionPhrases.some(phrase => lowerText.includes(phrase))) return true;
+
+        return false;
+      };
+
+      // Only trigger coach if explicitly requested OR if message is a question
+      if (shouldTriggerCoach || isQuestion()) {
         setTimeout(() => {
           autoCoachResponse(text, newCoverage);
         }, 1500);
@@ -1001,7 +1022,6 @@ export default function Home() {
           /* Expanded View - Full panel */
           <>
             <div className="p-4 border-b flex items-center justify-between">
-              <h1 className="text-lg font-bold text-gray-800">Design Challenge</h1>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsLeftPanelCollapsed(true)}
@@ -1012,12 +1032,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                   </svg>
                 </button>
-                <button
-                  onClick={startNewSession}
-                  className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded font-medium transition-colors"
-                >
-                  New Session
-                </button>
+                <h1 className="text-lg font-bold text-gray-800">Design Challenge</h1>
               </div>
             </div>
 
@@ -1115,8 +1130,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* End & Debrief */}
-        <div className="p-4">
+        {/* New Session & End */}
+        <div className="p-4 space-y-2">
+          <button
+            onClick={startNewSession}
+            className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded font-medium transition-colors"
+          >
+            New Session
+          </button>
           <button
             onClick={endAndDebrief}
             disabled={isLoading}
@@ -1334,7 +1355,7 @@ export default function Home() {
                     handleManualInput();
                   }
                 }}
-                placeholder="Type your thinking... (End with ? to ask coach)"
+                placeholder="Type your thinking... (Ask questions to get coach response)"
                 className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <button
