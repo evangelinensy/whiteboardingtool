@@ -772,11 +772,12 @@ export default function Home() {
         {/* Hero Section */}
         <div className="max-w-5xl mx-auto px-6 pt-20 pb-16">
           <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-6xl font-semibold text-gray-900 tracking-tight mb-6 leading-tight">
+            <h1 className="text-5xl md:text-6xl font-semibold text-gray-900 tracking-tight mb-3 leading-tight">
               Practice Whiteboarding Mock
-              <br />
-              <span className="text-gray-400">For Product Designer Interviews</span>
             </h1>
+            <p className="text-2xl md:text-3xl text-gray-400 font-normal mb-6">
+              Product Designer Interviews
+            </p>
             <p className="text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
               Solo or together, challenge yourself with timed simulations, AI feedback, and a smart whiteboard—no practice partner required.
             </p>
